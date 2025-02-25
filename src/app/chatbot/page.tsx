@@ -1,6 +1,7 @@
-"use client";
+"use client"
 
 import { useState, useRef, useEffect } from "react";
+import { FaPaperPlane, FaRobot, FaUser } from "react-icons/fa";
 
 interface Message {
   text: string;
@@ -11,10 +12,12 @@ const ChatBot = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const chatContainerRef = useRef<HTMLDivElement | null>(null); // 🔥 Use useRef for chat scrolling
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   }, [messages]);
 
   const sendMessage = async () => {
@@ -26,16 +29,14 @@ const ChatBot = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/chatbot', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const response = await fetch("/api/chatbot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
       });
 
       const data = await response.json();
-      
+
       const botMessage: Message = {
         text: data || "I'm not sure how to respond.",
         sender: "bot",
@@ -43,10 +44,14 @@ const ChatBot = () => {
 
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
-      console.error("Error:", error);
+      console.log(error);
+
       setMessages((prev) => [
         ...prev,
-        { text: "Sorry, something went wrong. Please try again later.", sender: "bot" },  // More user-friendly error message
+        {
+          text: "Sorry, something went wrong. Please try again later.",
+          sender: "bot",
+        },
       ]);
     } finally {
       setLoading(false);
@@ -54,55 +59,89 @@ const ChatBot = () => {
   };
 
   return (
-    <div className="hscreenF flex flex-col items-center justify-center">
-      <div className="my-8 w-full max-w-[1200px] flex justify-center">
-        <div className="flex flex-col w-full h-[80vh] p-4 space-y-4 bg-white border rounded-lg shadow-lg">
-          <h2 className="font-bold underline text-center">Chat Bot</h2>
-          <div className="flex flex-col flex-1 space-y-4 overflow-y-auto p-2 ">
-            {messages.map((message, index) => (
+    <div className="h-[85vh] flex flex-col items-center justify-center text-gray-900">
+      {/* Chat Header */}
+      <div className="w-full max-w-2xl flex items-center justify-between bg-blue-500 text-white py-3 px-5 rounded-t-2xl shadow-lg">
+        <div className="flex items-center gap-2">
+          <FaRobot className="text-2xl" />
+          <h2 className="text-lg font-semibold">ChatBot</h2>
+        </div>
+        <span className="text-sm opacity-80">Powered by Gemini</span>
+      </div>
+
+      {/* Chat Container */}
+      <div className="w-full max-w-2xl flex flex-col h-[80vh] bg-white shadow-xl border border-gray-300 rounded-b-2xl overflow-hidden">
+        {/* Chat Window (Only This Will Scroll) */}
+        <div
+          ref={chatContainerRef} // 🔥 Attach useRef here
+          className="flex-1 overflow-y-auto space-y-4 p-4"
+        >
+          <div className="flex items-start gap-2">
+            <FaRobot className="text-gray-600 text-lg" />
+            <div className="p-3 max-w-[75%] bg-gray-200 text-gray-900 rounded-xl">
+              👋 Hello! How can I assist you today?
+            </div>
+          </div>
+
+          {messages.map((message, index) => (
+            <div
+              key={index}
+              className={`flex ${
+                message.sender === "user" ? "justify-end" : "justify-start"
+              } items-center gap-2`}
+            >
+              {message.sender === "bot" && (
+                <FaRobot className="text-gray-600 text-lg" />
+              )}
               <div
-                key={index}
-                className={`p-3 max-w-[75%] ${
+                className={`p-3 max-w-[75%] rounded-xl ${
                   message.sender === "user"
-                    ? "bg-blue-500 text-white self-end rounded-tl-lg rounded-br-lg"
-                    : "bg-gray-200 text-black self-start rounded-tr-lg rounded-bl-lg border"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-gray-900"
                 }`}
               >
                 {message.text}
               </div>
-            ))}
-            {loading && (
-              <div className="p-2 rounded-lg max-w-[75%] bg-gray-100 text-black self-start">
+              {message.sender === "user" && (
+                <FaUser className="text-blue-500 text-lg" />
+              )}
+            </div>
+          ))}
+
+          {loading && (
+            <div className="flex items-start gap-2">
+              <FaRobot className="text-gray-600 text-lg" />
+              <div className="p-3 max-w-[75%] bg-gray-300 text-gray-700 rounded-xl">
                 Bot is typing...
               </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
+            </div>
+          )}
+        </div>
 
-          <div className="flex space-x-2">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && !loading && sendMessage()}
-              placeholder="Type a message..."
-              className="flex-1 p-2 border rounded-lg"
-              disabled={loading}
-              aria-label="Chat input"
-            />
-            <button
-              onClick={sendMessage}
-              disabled={loading}
-              className={`p-2 rounded-lg transition ${
-                loading
-                  ? "bg-gray-300 cursor-not-allowed"
-                  : "bg-blue-500 text-white hover:bg-blue-600"
-              }`}
-              aria-label="Send message"
-            >
-              {loading ? "Loading..." : "Send"}
-            </button>
-          </div>
+        {/* Input Field */}
+        <div className="flex items-center gap-2 mt-3 border border-gray-300 bg-gray-100 p-2 rounded-lg m-4">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && !loading && sendMessage()}
+            placeholder="Type a message..."
+            className="w-full bg-transparent outline-none text-gray-900 placeholder-gray-500"
+            disabled={loading}
+            aria-label="Chat input"
+          />
+          <button
+            onClick={sendMessage}
+            disabled={loading}
+            className={`p-2 rounded-lg transition ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-500 hover:bg-blue-600 text-white"
+            }`}
+            aria-label="Send message"
+          >
+            <FaPaperPlane />
+          </button>
         </div>
       </div>
     </div>

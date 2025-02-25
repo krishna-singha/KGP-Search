@@ -3,7 +3,15 @@
 @tailwind utilities;
 
 .heightF {
-  height: calc(100vh - 53px - 64px);
+  height: calc(100vh - 53px - 92px);
+}
+
+.minheightF {
+  min-height: calc(100vh - 53px - 92px);
+}
+
+.anonymous {
+  background-color: rgb(96, 1, 210);
 }
 
 /* :root {

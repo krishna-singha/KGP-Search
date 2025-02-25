@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 
 const getGreeting = () => {
@@ -26,7 +27,7 @@ const Greeting = () => {
     <div className="py-4 text-center">
       <h1 className="text-2xl">{greeting}</h1>
     </div>
-  )
+  );
 };
 
 export default Greeting;
