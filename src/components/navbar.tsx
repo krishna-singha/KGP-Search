@@ -1,54 +1,96 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import StylishButton from "./stylishBtn";
 import SearchBar from "./searchBar";
 import { usePathname } from "next/navigation";
 import Settings from "./settings";
+import Filter from "./filter";
 
 const Navbar = () => {
   const pathname = usePathname();
 
-  const navigation = [{ name: "History", href: "/history" }];
-
+  const [showFilters, setShowFilters] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const toggleSettings = () => setShowSettings((prev) => !prev);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        !(event.target as HTMLElement).closest(".filter-container") &&
+        showFilters
+      ) {
+        setShowFilters(false);
+      }
+      if (
+        !(event.target as HTMLElement).closest(".settings-container") &&
+        showSettings
+      ) {
+        setShowSettings(false);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [showFilters, showSettings]);
 
   return (
-    <nav className="bg-white border-b sticky top-0 py-2 z-50">
+    <nav className="bg-white border-b sticky top-0 py-2 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 w-full gap-4">
-          <div className="flex">
-            <Link href="/" className="flex items-center">
-              <span className="ml-2 text-xl font-bold text-nowrap">
-                KGP Search
-              </span>
-            </Link>
-          </div>
+        <div className="flex justify-between items-center gap-6 h-16 w-full">
+          {/* Logo */}
+          <Link href="/" className="flex items-center">
+            <span className="ml-2 text-xl font-bold text-gray-900 text-nowrap">
+              KGP Search
+            </span>
+          </Link>
 
-          <div
-            className={`w-full ${
-              pathname === "/search" ? "flex items-center" : "hidden"
-            }`}
-          >
-            <SearchBar />
-          </div>
-
-          <div className="relative hidden md:flex md:items-center md:space-x-6">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-              >
-                {item.name}
-              </Link>
-            ))}
-            <div onClick={toggleSettings} className="cursor-pointer">
-              Settings
+          {/* Search Bar (Only visible on /search) */}
+          {pathname === "/search" && (
+            <div className="w-full">
+              <SearchBar />
             </div>
-            {showSettings && <Settings />}
+          )}
+
+          {/* Right Side Menu */}
+          <div className="relative flex items-center space-x-6">
+            {pathname === "/search" && (
+              <div
+                className="cursor-pointer"
+                onClick={() => setShowFilters((prev) => !prev)}
+              >
+                Filters
+                {showFilters && (
+                  <div className="absolute top-10 left-0 w-48 bg-white border shadow-md p-2 rounded-md">
+                    <Filter />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* History Link */}
+            <Link
+              href="/history"
+              className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
+            >
+              History
+            </Link>
+
+            {/* Settings */}
+            <div
+              className="relative settings-container cursor-pointer"
+              onClick={() => setShowSettings((prev) => !prev)}
+            >
+              Settings
+              {showSettings && (
+                <div className="absolute top-10 right-0 w-48 bg-white border shadow-md p-2 rounded-md">
+                  <Settings />
+                </div>
+              )}
+            </div>
+
+            {/* Login Button */}
             <Link href="/login">
               <StylishButton variant="primary">Login</StylishButton>
             </Link>

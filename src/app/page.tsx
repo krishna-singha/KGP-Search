@@ -1,6 +1,7 @@
 import SearchBar from "../components/searchBar";
 import Greeting from "@/components/greeting";
 import Suggestions from "@/components/suggetions";
+import Filter from "@/components/filter";
 
 export default function Home() {
   return (
@@ -22,6 +23,9 @@ export default function Home() {
 
         {/* Search Bar */}
         <SearchBar />
+
+        {/* Filter Section */}
+        <Filter />
       </div>
 
       {/* Suggestions Section */}

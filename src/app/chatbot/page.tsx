@@ -12,7 +12,7 @@ const ChatBot = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const chatContainerRef = useRef<HTMLDivElement | null>(null); // 🔥 Use useRef for chat scrolling
+  const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (chatContainerRef.current) {

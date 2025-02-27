@@ -21,7 +21,7 @@ const Suggestions = () => {
   ];
 
   return (
-    <div className="mt-2 bg-white shadow-lg rounded-xl border border-gray-200 p-3 w-full">
+    <div className="bg-white shadow-lg rounded-xl border border-gray-200 p-3 w-full">
       {suggestions.map((suggestion, index) => (
         <div
           key={index}
