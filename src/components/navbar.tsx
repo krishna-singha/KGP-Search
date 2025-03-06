@@ -1,100 +1,145 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { getAuth, signInWithPopup } from "firebase/auth";
+import { provider } from "@/auth/firebase";
+import { User } from "@/lib/interface";
 import StylishButton from "./stylishBtn";
 import SearchBar from "./searchBar";
-import { usePathname } from "next/navigation";
 import Settings from "./settings";
 import Filter from "./filter";
 
 const Navbar = () => {
   const pathname = usePathname();
+  const auth = getAuth();
+  const [user, setUser] = useState<User | null>(null);
+  const [dropdown, setDropdown] = useState<
+    "filters" | "settings" | "user" | null
+  >(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const [showFilters, setShowFilters] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  // Handle Google sign-in
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      setUser(result.user);
+    } catch (error: any) {
+      console.error("Sign-in error:", error.message);
+    }
+  };
 
-  // Close dropdowns when clicking outside
+  const handleSignOut = async () => {
+    try {
+      await auth.signOut();
+      setUser(null);
+    } catch (error: any) {
+      console.error("Sign-out error:", error.message);
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(setUser);
+    return () => unsubscribe();
+  }, []);
+
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        !(event.target as HTMLElement).closest(".filter-container") &&
-        showFilters
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
       ) {
-        setShowFilters(false);
-      }
-      if (
-        !(event.target as HTMLElement).closest(".settings-container") &&
-        showSettings
-      ) {
-        setShowSettings(false);
+        setDropdown(null);
       }
     };
-
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, [showFilters, showSettings]);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
-    <nav className="bg-white border-b sticky top-0 py-2 z-50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center gap-6 h-16 w-full">
-          {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <span className="ml-2 text-xl font-bold text-gray-900 text-nowrap">
-              KGP Search
-            </span>
-          </Link>
+    <nav className="bg-white border-b sticky top-0 py-2 z-50 shadow-md">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center gap-4 h-16">
+        {/* Logo */}
+        <Link href="/" className="text-xl font-bold text-gray-900 text-nowrap">
+          KGP Search
+        </Link>
 
-          {/* Search Bar (Only visible on /search) */}
+        {/* Search Bar (Only visible on /search) */}
+        {pathname === "/search" && <SearchBar />}
+
+        {/* Right Menu */}
+        <div className="relative flex items-center space-x-6" ref={dropdownRef}>
           {pathname === "/search" && (
-            <div className="w-full">
-              <SearchBar />
-            </div>
-          )}
-
-          {/* Right Side Menu */}
-          <div className="relative flex items-center space-x-6">
-            {pathname === "/search" && (
-              <div
-                className="cursor-pointer"
-                onClick={() => setShowFilters((prev) => !prev)}
-              >
-                Filters
-                {showFilters && (
-                  <div className="absolute top-10 left-0 w-48 bg-white border shadow-md p-2 rounded-md">
-                    <Filter />
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* History Link */}
-            <Link
-              href="/history"
-              className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
-            >
-              History
-            </Link>
-
-            {/* Settings */}
             <div
-              className="relative settings-container cursor-pointer"
-              onClick={() => setShowSettings((prev) => !prev)}
+              className="cursor-pointer text-gray-700 hover:text-blue-600 transition-colors"
+              onClick={() =>
+                setDropdown(dropdown === "filters" ? null : "filters")
+              }
             >
-              Settings
-              {showSettings && (
-                <div className="absolute top-10 right-0 w-48 bg-white border shadow-md p-2 rounded-md">
-                  <Settings />
+              Filters
+              {dropdown === "filters" && (
+                <div className="absolute top-16 left-0 w-48 bg-white border shadow-lg p-2 rounded-md">
+                  <Filter />
                 </div>
               )}
             </div>
+          )}
 
-            {/* Login Button */}
-            <Link href="/login">
-              <StylishButton variant="primary">Login</StylishButton>
-            </Link>
+          {/* History */}
+          <Link
+            href="/history"
+            className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
+          >
+            History
+          </Link>
+
+          {/* Settings */}
+          <div
+            className="relative cursor-pointer text-gray-700 hover:text-blue-600 transition-colors"
+            onClick={() =>
+              setDropdown(dropdown === "settings" ? null : "settings")
+            }
+          >
+            Settings
+            {dropdown === "settings" && (
+              <div className="absolute top-14 right-0 w-80 bg-white border shadow-lg rounded-xl p-4 flex flex-col gap-2">
+                <Settings />
+              </div>
+            )}
           </div>
+
+          {/* User Profile/Login */}
+          {user ? (
+            <div
+              className="w-12 flex items-center gap-2 cursor-pointer border border-gray-300 rounded-full p-1"
+              onClick={() => setDropdown(dropdown === "user" ? null : "user")}
+            >
+              <img
+                src={user.photoURL || "/default-avatar.png"}
+                alt="User"
+                className="w-10 h-10 rounded-full"
+              />
+              {dropdown === "user" && (
+                <div className="absolute top-16 right-0 w-64 bg-white border shadow-lg rounded-xl p-4 flex flex-col gap-3">
+                  <span className="text-lg font-semibold">
+                    {user.displayName || "Anonymous"}
+                  </span>
+                  <span className="text-sm text-gray-600">
+                    {user.email || "No email"}
+                  </span>
+                  <StylishButton variant="danger" onClick={handleSignOut}>
+                    Sign Out
+                  </StylishButton>
+                </div>
+              )}
+            </div>
+          ) : (
+            <StylishButton variant="primary" onClick={handleGoogleSignIn}>
+              Login
+            </StylishButton>
+          )}
         </div>
       </div>
     </nav>

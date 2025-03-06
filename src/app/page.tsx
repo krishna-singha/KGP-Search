@@ -6,11 +6,8 @@ import Filter from "@/components/filter";
 export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center px-6 text-gray-900">
-      {/* Container with Max Width */}
-      <div className="w-full max-w-2xl mt-32 text-center">
+      <div className="w-full max-w-2xl mt-20 text-center">
         <Greeting />
-
-        {/* Header Section */}
         <div className="mb-6">
           <h1 className="text-5xl font-extrabold text-gray-900 tracking-tight">
             Discover Anything, Instantly
@@ -20,15 +17,9 @@ export default function Home() {
             <span className="text-blue-500 font-semibold">IIT KGP</span>
           </p>
         </div>
-
-        {/* Search Bar */}
         <SearchBar />
-
-        {/* Filter Section */}
         <Filter />
       </div>
-
-      {/* Suggestions Section */}
       <div className="mt-8 w-full max-w-2xl flex justify-center">
         <Suggestions />
       </div>

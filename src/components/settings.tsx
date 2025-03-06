@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   FaMoon,
@@ -10,39 +10,85 @@ import {
   FaLock,
   FaHistory,
 } from "react-icons/fa";
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import { toggleTheme } from "@/lib/redux/features/darkMode/darkModeSlice";
+import { toggleAnonymous } from "@/lib/redux/features/anonymousMode/anonymousModeSlice";
 
 const Settings = () => {
-  const [darkTheme, setDarkTheme] = useState(false);
-  const [historyMode, setHistoryMode] = useState(true);
-  const [anonymousMode, setAnonymousMode] = useState(false);
-  const [fontSize, setFontSize] = useState("medium");
-  const [language, setLanguage] = useState("English");
+  const dispatch = useAppDispatch();
+  const theme = useAppSelector((state) => state.darkMode.theme);
+  const [anonymous, setAnonymous] = useState<boolean | null>(null);
+  const [historyMode, setHistoryMode] = useState<boolean | null>(null);
+  const [fontSize, setFontSize] = useState<string | null>(null);
+  const [language, setLanguage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setHistoryMode(
+        localStorage.getItem("historyMode")
+          ? localStorage.getItem("historyMode") === "true"
+          : true
+      );
+      setFontSize(localStorage.getItem("fontSize") || "medium");
+      setLanguage(localStorage.getItem("language") || "English");
+      setAnonymous(
+        localStorage.getItem("anonymous")
+          ? localStorage.getItem("anonymous") === "true"
+          : false
+      );
+    }
+  }, []);
+
+  const handleSearchHistory = () => {
+    localStorage.setItem("historyMode", (!historyMode).toString());
+    setHistoryMode(!historyMode);
+  };
+
+  const handleAnonymousMode = () => {
+    dispatch(toggleAnonymous(!anonymous));
+    localStorage.setItem("anonymous", (!anonymous).toString());
+  };
+
+  const handleFontSize = (size: string) => {
+    localStorage.setItem("fontSize", size);
+    setFontSize(size);
+  };
+
+  const handleLanguage = (lang: string) => {
+    localStorage.setItem("language", lang);
+    setLanguage(lang);
+  };
+
+  // Prevent rendering until client state is initialized
+  if (historyMode === null || fontSize === null || language === null) {
+    return null;
+  }
 
   return (
-    <div className="absolute top-16 right-0 shadow-lg bg-white border border-gray-200 rounded-xl w-80 p-4 flex flex-col gap-3 transition-all duration-300">
+    <>
       <h2 className="text-lg font-semibold text-gray-700">Settings</h2>
 
       {/* Dark Mode Toggle */}
       <div
         className="flex items-center justify-between cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition"
-        onClick={() => setDarkTheme(!darkTheme)}
+        onClick={() => dispatch(toggleTheme())}
       >
         <span className="flex items-center gap-2 text-gray-800">
-          {darkTheme ? (
-            <FaMoon className="text-blue-600" />
+          {theme === "dark" ? (
+            <FaMoon className="text-blue-400" />
           ) : (
             <FaSun className="text-yellow-500" />
           )}
           Dark Mode
         </span>
         <div
-          className={`w-10 h-5 flex items-center bg-gray-300 rounded-full p-1 ${
-            darkTheme ? "bg-green-500" : "bg-gray-400"
+          className={`w-10 h-5 flex items-center rounded-full p-1 transition ${
+            theme === "dark" ? "bg-green-500" : "bg-gray-400"
           }`}
         >
           <div
             className={`bg-white w-4 h-4 rounded-full shadow-md transform transition ${
-              darkTheme ? "translate-x-5" : "translate-x-0"
+              theme === "dark" ? "translate-x-5" : "translate-x-0"
             }`}
           />
         </div>
@@ -51,14 +97,14 @@ const Settings = () => {
       {/* History Mode Toggle */}
       <div
         className="flex items-center justify-between cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition"
-        onClick={() => setHistoryMode(!historyMode)}
+        onClick={handleSearchHistory}
       >
         <span className="flex items-center gap-2 text-gray-800">
           <FaHistory className="text-gray-700" />
           Search History
         </span>
         <div
-          className={`w-10 h-5 flex items-center bg-gray-300 rounded-full p-1 ${
+          className={`w-10 h-5 flex items-center rounded-full p-1 transition ${
             historyMode ? "bg-green-500" : "bg-gray-400"
           }`}
         >
@@ -73,20 +119,20 @@ const Settings = () => {
       {/* Anonymous Mode Toggle */}
       <div
         className="flex items-center justify-between cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition"
-        onClick={() => setAnonymousMode(!anonymousMode)}
+        onClick={handleAnonymousMode}
       >
         <span className="flex items-center gap-2 text-gray-800">
           <FaLock className="text-gray-700" />
           Anonymous Mode
         </span>
         <div
-          className={`w-10 h-5 flex items-center bg-gray-300 rounded-full p-1 ${
-            anonymousMode ? "bg-green-500" : "bg-gray-400"
+          className={`w-10 h-5 flex items-center rounded-full p-1 transition ${
+            anonymous ? "bg-green-500" : "bg-gray-400"
           }`}
         >
           <div
             className={`bg-white w-4 h-4 rounded-full shadow-md transform transition ${
-              anonymousMode ? "translate-x-5" : "translate-x-0"
+              anonymous ? "translate-x-5" : "translate-x-0"
             }`}
           />
         </div>
@@ -101,7 +147,7 @@ const Settings = () => {
         <select
           className="bg-gray-200 text-gray-800 p-1 rounded-md cursor-pointer"
           value={fontSize}
-          onChange={(e) => setFontSize(e.target.value)}
+          onChange={(e) => handleFontSize(e.target.value)}
         >
           <option value="small">Small</option>
           <option value="medium">Medium</option>
@@ -118,11 +164,11 @@ const Settings = () => {
         <select
           className="bg-gray-200 text-gray-800 p-1 rounded-md cursor-pointer"
           value={language}
-          onChange={(e) => setLanguage(e.target.value)}
+          onChange={(e) => handleLanguage(e.target.value)}
         >
           <option value="English">English</option>
-          <option value="Spanish">Hindi</option>
-          <option value="French">Bengali</option>
+          <option value="Hindi">Hindi</option>
+          <option value="Bengali">Bengali</option>
         </select>
       </div>
 
@@ -133,7 +179,7 @@ const Settings = () => {
       >
         Send Feedback
       </Link>
-    </div>
+    </>
   );
 };
 

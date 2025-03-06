@@ -3,7 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import ChatBotBtn from "@/components/chatBotBtn";
-import StoreProvider from "@/store/storeProvider";
+import StoreProvider from "@/app/storeProvider";
+import ThemeProvider from "./themeProvider";
 import "@/styles/globals.css";
 
 const geistSans = Geist({
@@ -27,24 +28,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <StoreProvider>
-      <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gray-50 text-gray-900 flex flex-col`}
-        >
-          {/* Navbar */}
-          <Navbar />
-
-          {/* Main Content */}
-          <main className="flex-1 min-h-screen max-w-7xl mx-auto w-full px-6 py-10">
-            {children}
-            <ChatBotBtn />
-          </main>
-
-          {/* Footer */}
-          <Footer />
-        </body>
-      </html>
-    </StoreProvider>
+    <html lang="en">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gray-50 text-gray-900 flex flex-col`}
+      >
+        <StoreProvider>
+          <ThemeProvider>
+            <Navbar />
+            <main className="flex-1 min-h-screen max-w-7xl mx-auto w-full px-6 py-10">
+              {children}
+              <ChatBotBtn />
+            </main>
+            <Footer />
+          </ThemeProvider>
+        </StoreProvider>
+      </body>
+    </html>
   );
 }
