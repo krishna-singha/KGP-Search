@@ -1,5 +1,5 @@
 export interface DarkModeState {
-  theme: "light" | "dark" | "anonymous";
+  theme: "light" | "dark";
 }
 
 export interface FilterState {

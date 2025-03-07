@@ -1,233 +1,71 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import axios from "axios";
 
 const RESULTS_PER_PAGE = 15;
 
 export type SearchResult = {
-  title: string;
+  base_url: string;
   url: string;
-  description: string;
-  siteName: string;
-  favicon?: string;
-  extraLinks?: { label: string; href: string }[];
+  favicon: string;
+  title: string;
+  content: string;
 };
-
-export type SearchResultsProps = {
-  results: SearchResult[];
-};
-
-const results: SearchResult[] = [
-  {
-    title: "Hello, World! Program",
-    url: "https://en.wikipedia.org/wiki/Hello_World_program",
-    description:
-      'A "Hello, World!" program is a simple program that outputs "Hello, World!" to the screen.',
-    siteName: "Wikipedia",
-    favicon: "https://www.google.com/s2/favicons?domain=en.wikipedia.org",
-    extraLinks: [
-      {
-        label: "History",
-        href: "https://en.wikipedia.org/wiki/Hello_World_program#History",
-      },
-      {
-        label: "Variations",
-        href: "https://en.wikipedia.org/wiki/Hello_World_program#Variations",
-      },
-    ],
-  },
-  {
-    title: "C Hello World Program",
-    url: "https://www.geeksforgeeks.org/c-hello-world-program/",
-    description:
-      'The "Hello World" program is the first step towards learning C programming.',
-    siteName: "GeeksforGeeks",
-    favicon: "https://www.google.com/s2/favicons?domain=geeksforgeeks.org",
-  },
-  {
-    title: "Hello World in C",
-    url: "https://www.programiz.com/c-programming/examples/print-sentence",
-    description:
-      'In this example, you will learn to print "Hello, World!" on the screen in C programming.',
-    siteName: "Programiz",
-    favicon: "https://www.google.com/s2/favicons?domain=programiz.com",
-  },
-  {
-    title: "Hello, World! Program",
-    url: "https://en.wikipedia.org/wiki/Hello_World_program",
-    description:
-      'A "Hello, World!" program is a simple program that outputs "Hello, World!" to the screen.',
-    siteName: "Wikipedia",
-    favicon: "https://www.google.com/s2/favicons?domain=en.wikipedia.org",
-    extraLinks: [
-      {
-        label: "History",
-        href: "https://en.wikipedia.org/wiki/Hello_World_program#History",
-      },
-      {
-        label: "Variations",
-        href: "https://en.wikipedia.org/wiki/Hello_World_program#Variations",
-      },
-    ],
-  },
-  {
-    title: "C Hello World Program",
-    url: "https://www.geeksforgeeks.org/c-hello-world-program/",
-    description:
-      'The "Hello World" program is the first step towards learning C programming.',
-    siteName: "GeeksforGeeks",
-    favicon: "https://www.google.com/s2/favicons?domain=geeksforgeeks.org",
-  },
-  {
-    title: "Hello World in C",
-    url: "https://www.programiz.com/c-programming/examples/print-sentence",
-    description:
-      'In this example, you will learn to print "Hello, World!" on the screen in C programming.',
-    siteName: "Programiz",
-    favicon: "https://www.google.com/s2/favicons?domain=programiz.com",
-  },
-  {
-    title: "Hello, World! Program",
-    url: "https://en.wikipedia.org/wiki/Hello_World_program",
-    description:
-      'A "Hello, World!" program is a simple program that outputs "Hello, World!" to the screen.',
-    siteName: "Wikipedia",
-    favicon: "https://www.google.com/s2/favicons?domain=en.wikipedia.org",
-    extraLinks: [
-      {
-        label: "History",
-        href: "https://en.wikipedia.org/wiki/Hello_World_program#History",
-      },
-      {
-        label: "Variations",
-        href: "https://en.wikipedia.org/wiki/Hello_World_program#Variations",
-      },
-    ],
-  },
-  {
-    title: "C Hello World Program",
-    url: "https://www.geeksforgeeks.org/c-hello-world-program/",
-    description:
-      'The "Hello World" program is the first step towards learning C programming.',
-    siteName: "GeeksforGeeks",
-    favicon: "https://www.google.com/s2/favicons?domain=geeksforgeeks.org",
-  },
-  {
-    title: "Hello World in C",
-    url: "https://www.programiz.com/c-programming/examples/print-sentence",
-    description:
-      'In this example, you will learn to print "Hello, World!" on the screen in C programming.',
-    siteName: "Programiz",
-    favicon: "https://www.google.com/s2/favicons?domain=programiz.com",
-  },
-  {
-    title: "Hello, World! Program",
-    url: "https://en.wikipedia.org/wiki/Hello_World_program",
-    description:
-      'A "Hello, World!" program is a simple program that outputs "Hello, World!" to the screen.',
-    siteName: "Wikipedia",
-    favicon: "https://www.google.com/s2/favicons?domain=en.wikipedia.org",
-    extraLinks: [
-      {
-        label: "History",
-        href: "https://en.wikipedia.org/wiki/Hello_World_program#History",
-      },
-      {
-        label: "Variations",
-        href: "https://en.wikipedia.org/wiki/Hello_World_program#Variations",
-      },
-    ],
-  },
-  {
-    title: "C Hello World Program",
-    url: "https://www.geeksforgeeks.org/c-hello-world-program/",
-    description:
-      'The "Hello World" program is the first step towards learning C programming.',
-    siteName: "GeeksforGeeks",
-    favicon: "https://www.google.com/s2/favicons?domain=geeksforgeeks.org",
-  },
-  {
-    title: "Hello World in C",
-    url: "https://www.programiz.com/c-programming/examples/print-sentence",
-    description:
-      'In this example, you will learn to print "Hello, World!" on the screen in C programming.',
-    siteName: "Programiz",
-    favicon: "https://www.google.com/s2/favicons?domain=programiz.com",
-  },
-  {
-    title: "Hello, World! Program",
-    url: "https://en.wikipedia.org/wiki/Hello_World_program",
-    description:
-      'A "Hello, World!" program is a simple program that outputs "Hello, World!" to the screen.',
-    siteName: "Wikipedia",
-    favicon: "https://www.google.com/s2/favicons?domain=en.wikipedia.org",
-    extraLinks: [
-      {
-        label: "History",
-        href: "https://en.wikipedia.org/wiki/Hello_World_program#History",
-      },
-      {
-        label: "Variations",
-        href: "https://en.wikipedia.org/wiki/Hello_World_program#Variations",
-      },
-    ],
-  },
-  {
-    title: "C Hello World Program",
-    url: "https://www.geeksforgeeks.org/c-hello-world-program/",
-    description:
-      'The "Hello World" program is the first step towards learning C programming.',
-    siteName: "GeeksforGeeks",
-    favicon: "https://www.google.com/s2/favicons?domain=geeksforgeeks.org",
-  },
-  {
-    title: "Hello World in C",
-    url: "https://www.programiz.com/c-programming/examples/print-sentence",
-    description:
-      'In this example, you will learn to print "Hello, World!" on the screen in C programming.',
-    siteName: "Programiz",
-    favicon: "https://www.google.com/s2/favicons?domain=programiz.com",
-  },
-  {
-    title: "Hello, World! Program",
-    url: "https://en.wikipedia.org/wiki/Hello_World_program",
-    description:
-      'A "Hello, World!" program is a simple program that outputs "Hello, World!" to the screen.',
-    siteName: "Wikipedia",
-    favicon: "https://www.google.com/s2/favicons?domain=en.wikipedia.org",
-    extraLinks: [
-      {
-        label: "History",
-        href: "https://en.wikipedia.org/wiki/Hello_World_program#History",
-      },
-      {
-        label: "Variations",
-        href: "https://en.wikipedia.org/wiki/Hello_World_program#Variations",
-      },
-    ],
-  },
-  {
-    title: "C Hello World Program",
-    url: "https://www.geeksforgeeks.org/c-hello-world-program/",
-    description:
-      'The "Hello World" program is the first step towards learning C programming.',
-    siteName: "GeeksforGeeks",
-    favicon: "https://www.google.com/s2/favicons?domain=geeksforgeeks.org",
-  },
-  {
-    title: "Hello World in C",
-    url: "https://www.programiz.com/c-programming/examples/print-sentence",
-    description:
-      'In this example, you will learn to print "Hello, World!" on the screen in C programming.',
-    siteName: "Programiz",
-    favicon: "https://www.google.com/s2/favicons?domain=programiz.com",
-  },
-];
 
 const SearchResults = () => {
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get("query") || "";
+
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [fetchingTime, setFetchingTime] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (!searchQuery) return;
+
+    const fetchResults = async () => {
+      setLoading(true);
+      setProgress(0);
+      setResults([]);
+
+      const startTime = performance.now();
+
+      intervalRef.current = setInterval(() => {
+        setProgress((prev) => Math.min(prev + 10, 95));
+      }, 200);
+
+      try {
+        const response = await axios.get(
+          `http://127.0.0.1:8000/search/text?query=${searchQuery}`
+        );
+        setResults(response.data.results);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        clearInterval(intervalRef.current!);
+        setProgress(100);
+        setTimeout(() => {
+          setLoading(false);
+        }, 300);
+
+        setFetchingTime(performance.now() - startTime);
+      }
+    };
+
+    fetchResults();
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [searchQuery]);
+
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(results.length / RESULTS_PER_PAGE);
   const startIndex = (currentPage - 1) * RESULTS_PER_PAGE;
@@ -235,14 +73,20 @@ const SearchResults = () => {
     startIndex,
     startIndex + RESULTS_PER_PAGE
   );
+  const resTime = fetchingTime.toFixed(2);
 
   return (
     <div className="w-full mx-auto space-y-6">
-      <div className="">
-        <p className="text-gray-500 text-sm">
-          About {results.length} results (0.69 seconds)
-        </p>
-      </div>
+      {loading && (
+        <div
+          className="fixed top-20 left-0 h-1 bg-blue-600 transition-all"
+          style={{ width: `${progress}%`, zIndex: 1000 }}
+        />
+      )}
+
+      <p className="text-gray-500 text-sm">
+        About {results.length} results ({resTime} ms)
+      </p>
 
       {paginatedResults.map((result, index) => (
         <div key={index} className="border-b pb-4 flex items-start gap-3">
@@ -251,10 +95,10 @@ const SearchResults = () => {
               <Link href={result.url}>
                 <Image
                   src={result.favicon}
-                  alt="Favicon"
                   width={20}
                   height={20}
-                  className="w-6 h-6"
+                  alt="Favicon"
+                  className="rounded-full"
                 />
               </Link>
             </div>
@@ -262,7 +106,7 @@ const SearchResults = () => {
           <div>
             <div className="text-gray-500 text-sm flex items-center">
               <p className="inline-block text-black font-semibold">
-                {result.siteName}{" "}
+                {result.base_url}
               </p>
               <ChevronRight size={13} className="inline-block ml-1" />
               <Link href={result.url} className="hover:underline">
@@ -275,44 +119,33 @@ const SearchResults = () => {
             >
               {result.title}
             </Link>
-            <p className="text-gray-700 text-sm mt-1">{result.description}</p>
-            {result.extraLinks && (
-              <div className="mt-2 flex flex-wrap gap-2">
-                {result.extraLinks.map((link, i) => (
-                  <Link
-                    key={i}
-                    href={link.href}
-                    className="text-blue-500 text-sm hover:underline"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
-            )}
           </div>
         </div>
       ))}
 
-      {/* Pagination Controls */}
-      <div className="flex justify-center mt-4 gap-4 items-center">
-        <button
-          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span className="text-gray-700">
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
-          onClick={() => setCurrentPage(currentPage + 1)}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
-      </div>
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-4 gap-4 items-center">
+          <button
+            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+          <span className="text-gray-700">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };

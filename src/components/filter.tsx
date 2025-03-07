@@ -20,21 +20,24 @@ const options = [
 const Filter = () => {
   const pathname = usePathname();
   const dispatch = useDispatch();
-  const selected = useSelector((state: RootState) => state.filter.value);
-  const [mounted, setMounted] = useState(false);
+  const reduxSelected = useSelector((state: RootState) => state.filter.value);
+  const [selected, setSelected] = useState<string | null>(null);
 
   useEffect(() => {
-    setMounted(true);
     const storedFilter = localStorage.getItem("filter") || "All";
-    dispatch(setFilter(storedFilter));
-  }, [dispatch]);
-
-  if (!mounted) return null;
+    if (storedFilter !== reduxSelected) {
+      dispatch(setFilter(storedFilter));
+    }
+    setSelected(storedFilter);
+  }, [dispatch, reduxSelected]);
 
   const handleSelect = (option: string) => {
     localStorage.setItem("filter", option);
     dispatch(setFilter(option));
+    setSelected(option);
   };
+
+  if (selected === null) return null;
 
   return (
     <div className="w-full">
@@ -47,8 +50,8 @@ const Filter = () => {
                 ${
                   selected === option
                     ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-gray-800"
-                } hover:bg-blue-600`}
+                    : "bg-gray-200 text-gray-800 dark:bg-[#212121] dark:text-white"
+                }`}
               onClick={() => handleSelect(option)}
             >
               {option}
@@ -59,11 +62,11 @@ const Filter = () => {
         options.map((option) => (
           <div
             key={option}
-            className={`px-3 py-2 text-gray-800 cursor-pointer rounded-md transition-colors
+            className={`px-3 py-2 text-gray-800 cursor-pointer rounded-md transition-colors dark:text-white
                   ${
                     selected === option
                       ? "bg-blue-500 text-white"
-                      : "hover:bg-gray-200"
+                      : "hover:bg-gray-200 dark:hover:bg-black"
                   }`}
             onClick={() => handleSelect(option)}
           >
