@@ -20,10 +20,10 @@ export default function Home() {
         <Filter />
       </section>
 
-      {/* Suggestions Section */}
+      {/* Suggestions Section
       <section className="mt-8 w-full max-w-2xl flex justify-center">
         <Suggestions />
-      </section>
+      </section> */}
     </main>
   );
 }

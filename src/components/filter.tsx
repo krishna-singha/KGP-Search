@@ -12,9 +12,9 @@ const options = [
   "Departments",
   "Faculties",
   "Courses",
-  "Gymkhana",
+  // "Gymkhana",
   "Exams",
-  "Societies",
+  // "Societies",
 ];
 
 const Filter = () => {

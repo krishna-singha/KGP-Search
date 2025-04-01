@@ -11,7 +11,7 @@ import StylishButton from "./stylishBtn";
 import SearchBar from "./searchBar";
 import Settings from "./settings";
 import Filter from "./filter";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/3.png";
 
 const Navbar = () => {
   const pathname = usePathname();

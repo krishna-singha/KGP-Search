@@ -19,6 +19,7 @@ const SearchBar = () => {
   const handleSearch = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!query.trim()) return;
+    if (query.length < 3) return;
     router.push(`/search?query=${encodeURIComponent(query)}`);
   };
 

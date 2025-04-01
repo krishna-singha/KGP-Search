@@ -4,13 +4,13 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import axios from "axios";
+import { FaGlobeAsia } from "react-icons/fa";
 
 const RESULTS_PER_PAGE = 15;
 
 export type SearchResult = {
-  base_url: string;
   url: string;
   favicon: string;
   title: string;
@@ -18,6 +18,7 @@ export type SearchResult = {
 };
 
 const SearchResults = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("query") || "";
 
@@ -29,7 +30,9 @@ const SearchResults = () => {
 
   useEffect(() => {
     if (!searchQuery) return;
-
+    if(searchQuery.length < 3) return;
+    const filterQuery = localStorage.getItem("filter");
+    
     const fetchResults = async () => {
       setLoading(true);
       setProgress(0);
@@ -42,8 +45,8 @@ const SearchResults = () => {
       }, 200);
 
       try {
-        const response = await axios.get(
-          `http://127.0.0.1:8000/search/text?query=${searchQuery}`
+        const response = await axios.post(
+          `http://127.0.0.1:8000/api/search?query=${searchQuery}`, {filterQuery}
         );
         setResults(response.data.results);
       } catch (error) {
@@ -55,7 +58,7 @@ const SearchResults = () => {
           setLoading(false);
         }, 300);
 
-        setFetchingTime(performance.now() - startTime);
+        setFetchingTime((performance.now() - startTime) / 60);
       }
     };
 
@@ -66,6 +69,13 @@ const SearchResults = () => {
     };
   }, [searchQuery]);
 
+  const splitUrl = (url: string) => {
+    const urlParts = url.split("/");
+    const domain = urlParts[2];
+    const path = urlParts.slice(3).join("/");
+    return { domain, path };
+  };
+
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(results.length / RESULTS_PER_PAGE);
   const startIndex = (currentPage - 1) * RESULTS_PER_PAGE;
@@ -74,6 +84,16 @@ const SearchResults = () => {
     startIndex + RESULTS_PER_PAGE
   );
   const resTime = fetchingTime.toFixed(2);
+
+
+  const handleClickCount = async (url: string) => {
+    try {
+      await axios.post("http://127.0.0.1:8000/api/click", { url });
+      router.push(url);
+    } catch (error) {
+      console.error("Error updating click count:", error);
+    }
+  };
 
   return (
     <div className="w-full mx-auto space-y-6">
@@ -85,40 +105,57 @@ const SearchResults = () => {
       )}
 
       <p className="text-gray-500 text-sm">
-        About {results.length} results ({resTime} ms)
+        About {results.length} results ({resTime} seconds)
       </p>
+      {results.length === 0 && (
+        <div className="flex justify-center items-center heightF">
+          <span className="font-bold text-xl">No results found!!</span>
+        </div>
+      )}
 
       {paginatedResults.map((result, index) => (
         <div key={index} className="border-b pb-4 flex items-start gap-3">
-          {result.favicon && (
-            <div className="border-2 rounded-full p-1 overflow-hidden">
-              <Link href={result.url}>
+          <div className="border-2 rounded-full p-1 overflow-hidden flex justify-center items-center">
+            <Link href={result.url}>
+              {result.favicon.length !== 0 ? (
                 <Image
                   src={result.favicon}
+                  alt="favicon"
                   width={20}
                   height={20}
-                  alt="Favicon"
                   className="rounded-full"
                 />
-              </Link>
-            </div>
-          )}
+              ) : (
+                <FaGlobeAsia className="text-[#28282898]" />
+              )}
+            </Link>
+          </div>
           <div>
             <div className="text-gray-500 text-sm flex items-center">
               <p className="inline-block text-black font-semibold">
-                {result.base_url}
+                {splitUrl(result.url).domain}
               </p>
-              <ChevronRight size={13} className="inline-block ml-1" />
-              <Link href={result.url} className="hover:underline">
-                {result.url}
-              </Link>
+              {splitUrl(result.url)
+                .path.split("/")
+                .filter((part) => part.trim() !== "")
+                .map((part, i) => (
+                  <span key={i} className="text-gray-500">
+                    <ChevronRight size={13} className="inline-block ml-1" />
+                    {part}
+                  </span>
+                ))}
             </div>
-            <Link
-              href={result.url}
-              className="text-blue-700 text-lg font-medium hover:underline"
+            <div
+              className="text-blue-700 text-lg font-medium hover:underline cursor-pointer"
+              onClick={() => handleClickCount(result.url)}
             >
               {result.title}
-            </Link>
+            </div>
+            <div>
+              <p className="text-gray-700 text-sm">
+                {result.content !== "[]" && result.content}
+              </p>
+            </div>
           </div>
         </div>
       ))}
