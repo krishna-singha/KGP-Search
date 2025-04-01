@@ -81,7 +81,7 @@ const Settings = () => {
       </div>
 
       {/* Anonymous Mode Toggle */}
-      <div
+      {/* <div
         className="flex items-center justify-between cursor-pointer p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-black transition"
         onClick={() => {
           dispatch(toggleAnonymous(!settings.anonymous));
@@ -95,7 +95,7 @@ const Settings = () => {
         <div className={`w-10 h-5 flex items-center rounded-full p-1 transition ${settings.anonymous ? "bg-green-500" : "bg-gray-400"}`}>
           <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition ${settings.anonymous ? "translate-x-5" : "translate-x-0"}`} />
         </div>
-      </div>
+      </div> */}
 
       {/* Font Size Selector */}
       <div className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-black transition">
