@@ -4,11 +4,14 @@ import { useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { useRouter, useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
+import { useAppSelector } from "@/lib/redux/hooks";
 
 const SearchBar = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const usrQuery = searchParams.get("query") || "";
+  const filter = useAppSelector((state) => state.filter.value);
+  
 
   const [query, setQuery] = useState(usrQuery);
 
@@ -16,7 +19,7 @@ const SearchBar = () => {
     event.preventDefault();
     const trimmedQuery = query.trim();
     if (trimmedQuery.length < 3) return;
-    router.push(`/search?query=${encodeURIComponent(trimmedQuery)}`);
+    router.push(`/search?query=${encodeURIComponent(trimmedQuery)}&filter=${filter}`);
   };
 
   return (

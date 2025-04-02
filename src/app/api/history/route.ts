@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Client } from "@elastic/elasticsearch";
 import { v4 as uuidv4 } from "uuid";
+const ELASTICSEARCH_URL = process.env.NEXT_PUBLIC_ELASTICSEARCH_URL;
 
 // Initialize Elasticsearch Client
-const esClient = new Client({ node: "http://localhost:9200" });
+const esClient = new Client({ node: ELASTICSEARCH_URL });
 
 // Ensure Elasticsearch Index Exists
 async function ensureIndexExists() {

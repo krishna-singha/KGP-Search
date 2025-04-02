@@ -64,7 +64,7 @@ const Navbar = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         if (dropdown === "settings" && settingsChanged) {
-          setTimeout(() => window.location.reload(), 200); // Refresh if settings were changed
+          setTimeout(() => window.location.reload(), 200);
         }
         setDropdown(null);
       }

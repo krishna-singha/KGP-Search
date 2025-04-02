@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
@@ -8,6 +8,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { useAppSelector } from "@/lib/redux/hooks";
 import debounce from "lodash.debounce";
+
+const FASTAPI_URL = process.env.NEXT_PUBLIC_FASTAPI_URL;
 
 const RESULTS_PER_PAGE = 15;
 const FALLBACK_FAVICON = "https://www.iitkgp.ac.in/assets/img/favicon.png";
@@ -25,6 +27,7 @@ const SearchResults = () => {
   const searchQuery = searchParams.get("query") || "";
   const user = useAppSelector((state) => state.user);
   const historyMode = useAppSelector((state) => state.historyMode.enabled);
+  const filter = useAppSelector((state) => state.filter.value);
 
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -41,8 +44,6 @@ const SearchResults = () => {
     () =>
       debounce(async (query) => {
         if (!query || query.length < 3) return;
-        const filterQuery = localStorage.getItem("filter");
-
         setLoading(true);
         setProgress(0);
         setResults([]);
@@ -54,8 +55,7 @@ const SearchResults = () => {
 
         try {
           const response = await axios.post(
-            `http://127.0.0.1:8000/api/search?query=${query}`,
-            { filterQuery }
+            `${FASTAPI_URL}/api/search?query=${encodeURIComponent(query)}&filter=${filter}`,
           );
           setResults(response.data.results);
         } catch (error) {
@@ -90,7 +90,7 @@ const SearchResults = () => {
 
   const handleClickCount = async (url: string) => {
     try {
-      await axios.post("http://127.0.0.1:8000/api/click", { url });
+      await axios.post(`${FASTAPI_URL}/api/click`, { url });
 
       if (!userId || !email) {
         router.push(url);
