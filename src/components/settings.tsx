@@ -1,52 +1,57 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+// import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { FaMoon, FaSun, FaFont, FaGlobe, FaLock, FaHistory } from "react-icons/fa";
+import { FaMoon, FaSun, FaFont, FaGlobe, FaHistory } from "react-icons/fa";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { toggleTheme } from "@/lib/redux/features/darkMode/darkModeSlice";
-import { toggleAnonymous } from "@/lib/redux/features/anonymousMode/anonymousModeSlice";
+import { toggleHistoryMode } from "@/lib/redux/features/historyMode/historyModeSlice";
 
-// Define Settings State Type
-type SettingsState = {
-  anonymous: boolean;
-  historyMode: boolean;
-  fontSize: string;
-  language: string;
+// Define Props for Settings
+type SettingsProps = {
+  onSettingsChange?: () => void;
 };
 
-const Settings = () => {
+// // Define Settings State Type
+// type SettingsState = {
+//   fontSize: string;
+//   language: string;
+// };
+
+const Settings: React.FC<SettingsProps> = ({ onSettingsChange }) => {
   const dispatch = useAppDispatch();
   const theme = useAppSelector((state) => state.darkMode.theme);
+  const historyMode = useAppSelector((state) => state.historyMode.enabled);
 
-  // Consolidated State for Settings
-  const [settings, setSettings] = useState<SettingsState>({
-    anonymous: false,
-    historyMode: true,
-    fontSize: "medium",
-    language: "English",
-  });
+  // // Consolidated State for Settings
+  // const [settings, setSettings] = useState<SettingsState>({
+  //   fontSize: "medium",
+  //   language: "English",
+  // });
 
-  // Load settings from localStorage on mount
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setSettings({
-        anonymous: localStorage.getItem("anonymous") === "true",
-        historyMode: localStorage.getItem("historyMode") !== "false",
-        fontSize: localStorage.getItem("fontSize") || "medium",
-        language: localStorage.getItem("language") || "English",
-      });
-    }
-  }, []);
+  // // Load settings from localStorage on mount
+  // useEffect(() => {
+  //   if (typeof window !== "undefined") {
+  //     setSettings({
+  //       fontSize: localStorage.getItem("fontSize") || "medium",
+  //       language: localStorage.getItem("language") || "English",
+  //     });
+  //   }
+  // }, []);
 
-  // Generic function to update state & localStorage
-  const updateSetting = useCallback(
-    <K extends keyof SettingsState>(key: K, value: SettingsState[K]) => {
-      setSettings((prev) => ({ ...prev, [key]: value }));
-      localStorage.setItem(key, value.toString());
-    },
-    []
-  );
+  // // Generic function to update state & localStorage
+  // const updateSetting = useCallback(
+  //   <K extends keyof SettingsState>(key: K, value: SettingsState[K]) => {
+  //     localStorage.setItem(key, value.toString());
+  //     setSettings((prev) => ({ ...prev, [key]: value }));
+
+  //     // Notify parent (Navbar) that settings changed
+  //     if (onSettingsChange) {
+  //       onSettingsChange();
+  //     }
+  //   },
+  //   [onSettingsChange]
+  // );
 
   return (
     <>
@@ -69,35 +74,17 @@ const Settings = () => {
       {/* History Mode Toggle */}
       <div
         className="flex items-center justify-between cursor-pointer p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-black transition"
-        onClick={() => updateSetting("historyMode", !settings.historyMode)}
+        onClick={() => dispatch(toggleHistoryMode())}
       >
         <span className="flex items-center gap-2 text-gray-800 dark:text-[#bfbfbf]">
           <FaHistory className="text-gray-700 dark:text-white" />
           Search History
         </span>
-        <div className={`w-10 h-5 flex items-center rounded-full p-1 transition ${settings.historyMode ? "bg-green-500" : "bg-gray-400"}`}>
-          <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition ${settings.historyMode ? "translate-x-5" : "translate-x-0"}`} />
+        <div className={`w-10 h-5 flex items-center rounded-full p-1 transition ${historyMode ? "bg-green-500" : "bg-gray-400"}`}>
+          <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition ${historyMode ? "translate-x-5" : "translate-x-0"}`} />
         </div>
       </div>
-
-      {/* Anonymous Mode Toggle */}
-      {/* <div
-        className="flex items-center justify-between cursor-pointer p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-black transition"
-        onClick={() => {
-          dispatch(toggleAnonymous(!settings.anonymous));
-          updateSetting("anonymous", !settings.anonymous);
-        }}
-      >
-        <span className="flex items-center gap-2 text-gray-800 dark:text-[#bfbfbf]">
-          <FaLock className="text-gray-700 dark:text-white" />
-          Anonymous Mode
-        </span>
-        <div className={`w-10 h-5 flex items-center rounded-full p-1 transition ${settings.anonymous ? "bg-green-500" : "bg-gray-400"}`}>
-          <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition ${settings.anonymous ? "translate-x-5" : "translate-x-0"}`} />
-        </div>
-      </div> */}
-
-      {/* Font Size Selector */}
+{/* 
       <div className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-black transition">
         <span className="flex items-center gap-2 text-gray-800 dark:text-white">
           <FaFont className="text-blue-500" />
@@ -114,7 +101,6 @@ const Settings = () => {
         </select>
       </div>
 
-      {/* Language Selector */}
       <div className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-black transition">
         <span className="flex items-center gap-2 text-gray-800 dark:text-white">
           <FaGlobe className="text-green-500" />
@@ -130,6 +116,8 @@ const Settings = () => {
           <option value="Bengali">Bengali</option>
         </select>
       </div>
+
+*/}
 
       {/* Feedback Button */}
       <Link href="/send-feedback" className="mt-3 text-center text-blue-600 font-semibold hover:underline transition">

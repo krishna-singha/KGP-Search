@@ -38,5 +38,9 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
+}
 
+.image {
+  width: auto;
+  height: auto;
 }

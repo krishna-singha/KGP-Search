@@ -2,6 +2,8 @@ import { configureStore } from "@reduxjs/toolkit";
 import filterReducer from "./features/filter/filterSlice";
 import darkModeReducer from "./features/darkMode/darkModeSlice";
 import anonymousModeReducer from "./features/anonymousMode/anonymousModeSlice";
+import historyModeReducer from "./features/historyMode/historyModeSlice";
+import userReducer from "./features/user/userSlice";
 
 export const makeStore = () => {
   return configureStore({
@@ -9,6 +11,8 @@ export const makeStore = () => {
       filter: filterReducer,
       darkMode: darkModeReducer,
       anonymousMode: anonymousModeReducer,
+      historyMode: historyModeReducer,
+      user: userReducer,
     },
   });
 };

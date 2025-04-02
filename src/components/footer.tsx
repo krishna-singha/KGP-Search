@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { FaGithub, FaLinkedin } from "react-icons/fa";
+import { FaGithub, FaLinkedin, FaInstagram } from "react-icons/fa";
 import LastUpdated from "./utils/LastUpdated";
+import Details from "./utils/Details";
 
 const Footer = () => {
   const navigation = [
@@ -11,7 +12,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-white py-8 border-t">
+    <footer className="bg-white py-8 border-t dark:bg-[#0f0f0f] dark:text-white dark:border-[#ffffff33]">
       <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-sm">
         <div className="text-center md:text-left">
           <p className="text-xs opacity-80">
@@ -25,6 +26,7 @@ const Footer = () => {
             . All rights reserved.
           </p>
           <LastUpdated />
+          <Details />
         </div>
 
         <div className="flex flex-wrap justify-center md:justify-end space-x-6 mt-4 md:mt-0">
@@ -32,7 +34,7 @@ const Footer = () => {
             <Link
               key={item.name}
               href={item.href}
-              className="text-gray-600 hover:text-black transition duration-300"
+              className="text-gray-600 hover:text-black transition duration-300 dark:text-gray-500 dark:hover:text-white"
             >
               {item.name}
             </Link>
@@ -40,6 +42,13 @@ const Footer = () => {
         </div>
 
         <div className="flex space-x-4 mt-4 md:mt-0">
+          <Link
+            href="https://github.com/krishna___singha/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <FaInstagram className="text-xl hover:text-blue-600 hover:scale-125 transition duration-300" />
+          </Link>
           <Link
             href="https://github.com/krishna-singha/"
             target="_blank"

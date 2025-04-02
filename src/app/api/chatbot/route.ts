@@ -2,7 +2,7 @@ import { handleGenerateText } from "./generateText";
 
 export async function GET() {
   console.log("hello");
-  return new Response("Hello from GET", { status: 200 });
+  return new Response("Hello from Chatbot", { status: 200 });
 }
 
 export async function POST(request: Request) {
