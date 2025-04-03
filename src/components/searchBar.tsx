@@ -1,17 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { FaSearch } from "react-icons/fa";
 import { useRouter, useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
 import { useAppSelector } from "@/lib/redux/hooks";
 
-const SearchBar = () => {
+const SearchBarContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const usrQuery = searchParams.get("query") || "";
+  const usrQuery = searchParams?.get("query") || "";
   const filter = useAppSelector((state) => state.filter.value);
-  
 
   const [query, setQuery] = useState(usrQuery);
 
@@ -43,5 +42,11 @@ const SearchBar = () => {
     </form>
   );
 };
+
+const SearchBar = () => (
+  <Suspense fallback={<div>Loading search bar...</div>}>
+    <SearchBarContent />
+  </Suspense>
+);
 
 export default SearchBar;

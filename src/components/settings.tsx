@@ -2,15 +2,11 @@
 
 // import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { FaMoon, FaSun, FaFont, FaGlobe, FaHistory } from "react-icons/fa";
+import { FaMoon, FaSun, FaHistory } from "react-icons/fa";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { toggleTheme } from "@/lib/redux/features/darkMode/darkModeSlice";
 import { toggleHistoryMode } from "@/lib/redux/features/historyMode/historyModeSlice";
 
-// Define Props for Settings
-type SettingsProps = {
-  onSettingsChange?: () => void;
-};
 
 // // Define Settings State Type
 // type SettingsState = {
@@ -18,7 +14,7 @@ type SettingsProps = {
 //   language: string;
 // };
 
-const Settings: React.FC<SettingsProps> = ({ onSettingsChange }) => {
+const Settings = () => {
   const dispatch = useAppDispatch();
   const theme = useAppSelector((state) => state.darkMode.theme);
   const historyMode = useAppSelector((state) => state.historyMode.enabled);

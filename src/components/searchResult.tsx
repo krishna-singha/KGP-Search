@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
@@ -21,7 +21,7 @@ export type SearchResult = {
   content: string;
 };
 
-const SearchResults = () => {
+const SearchResultsContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("query") || "";
@@ -37,7 +37,6 @@ const SearchResults = () => {
 
   const userId = user?.uid || null;
   const email = user?.email || null;
-  
 
   // Debounced API call
   const fetchResults = useMemo(
@@ -55,7 +54,9 @@ const SearchResults = () => {
 
         try {
           const response = await axios.post(
-            `${FASTAPI_URL}/api/search?query=${encodeURIComponent(query)}&filter=${filter}`,
+            `${FASTAPI_URL}/api/search?query=${encodeURIComponent(
+              query
+            )}&filter=${filter}`
           );
           setResults(response.data.results);
         } catch (error) {
@@ -67,13 +68,15 @@ const SearchResults = () => {
           setFetchingTime((performance.now() - startTime) / 1000);
         }
       }, 500),
-    []
+    [filter]
   );
 
   useEffect(() => {
     fetchResults(searchQuery);
     return () => {
-      intervalRef.current && clearInterval(intervalRef.current);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
     };
   }, [searchQuery, fetchResults]);
 
@@ -85,7 +88,10 @@ const SearchResults = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.max(1, Math.ceil(results.length / RESULTS_PER_PAGE));
   const startIndex = (currentPage - 1) * RESULTS_PER_PAGE;
-  const paginatedResults = results.slice(startIndex, startIndex + RESULTS_PER_PAGE);
+  const paginatedResults = results.slice(
+    startIndex,
+    startIndex + RESULTS_PER_PAGE
+  );
   const resTime = fetchingTime.toFixed(2);
 
   const handleClickCount = async (url: string) => {
@@ -101,7 +107,14 @@ const SearchResults = () => {
         await axios.post("http://localhost:3000/api/history", {
           user_id: userId,
           email: email,
-          searchHistory: [{ type: "click", query: searchQuery, url, time: new Date().toISOString() }],
+          searchHistory: [
+            {
+              type: "click",
+              query: searchQuery,
+              url,
+              time: new Date().toISOString(),
+            },
+          ],
         });
       }
 
@@ -114,7 +127,10 @@ const SearchResults = () => {
   return (
     <div className="w-full mx-auto space-y-6">
       {loading && (
-        <div className="fixed top-20 left-0 h-1 bg-blue-600 transition-all" style={{ width: `${progress}%`, zIndex: 1000 }} />
+        <div
+          className="fixed top-20 left-0 h-1 bg-blue-600 transition-all"
+          style={{ width: `${progress}%`, zIndex: 1000 }}
+        />
       )}
       <p className="text-gray-500 text-sm">
         About {results.length} results ({resTime} seconds)
@@ -125,9 +141,15 @@ const SearchResults = () => {
         </div>
       )}
       {paginatedResults.map((result, index) => (
-        <div key={index} className="border-b pb-4 flex gap-3 dark:border-[#ffffff33]">
+        <div
+          key={index}
+          className="border-b pb-4 flex gap-3 dark:border-[#ffffff33]"
+        >
           <div className="border-2 rounded-full overflow-hidden flex justify-center items-center h-[1.8rem] w-[1.8rem] dark:border-gray-400 bg-white">
-            <Link href={result.url} className="w-full h-full flex justify-center items-center">
+            <Link
+              href={result.url}
+              className="w-full h-full flex justify-center items-center"
+            >
               <Image
                 src={result.favicon || FALLBACK_FAVICON}
                 alt="favicon"
@@ -144,37 +166,63 @@ const SearchResults = () => {
           </div>
           <div className="flex flex-col justify-center w-full">
             <div className="text-gray-500 text-sm flex items-center dark:text-white">
-              <p className="inline-block text-black font-semibold dark:text-white">{splitUrl(result.url).domain}</p>
-              {splitUrl(result.url).path.split("/").filter(Boolean).map((part, i) => (
-                <span key={i} className="text-gray-500">
-                  <ChevronRight size={13} className="inline-block ml-1" />
-                  {part}
-                </span>
-              ))}
+              <p className="inline-block text-black font-semibold dark:text-white">
+                {splitUrl(result.url).domain}
+              </p>
+              {splitUrl(result.url)
+                .path.split("/")
+                .filter(Boolean)
+                .map((part, i) => (
+                  <span key={i} className="text-gray-500">
+                    <ChevronRight size={13} className="inline-block ml-1" />
+                    {part}
+                  </span>
+                ))}
             </div>
-            <div className="text-blue-700 text-lg font-medium hover:underline cursor-pointer dark:text-blue-500" onClick={() => handleClickCount(result.url)}>
+            <div
+              className="text-blue-700 text-lg font-medium hover:underline cursor-pointer dark:text-blue-500"
+              onClick={() => handleClickCount(result.url)}
+            >
               {result.title}
             </div>
-            <p className="text-gray-700 text-sm dark:text-gray-400">{result.content !== "[]" && result.content}</p>
+            <p className="text-gray-700 text-sm dark:text-gray-400">
+              {result.content !== "[]" && result.content}
+            </p>
           </div>
         </div>
       ))}
       {totalPages > 1 && (
         <div className="flex justify-center mt-4 gap-4 items-center">
-          <button className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50 dark:bg-[#212121] dark:border-[#ffffff33] dark:text-white"
+          <button
+            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50 dark:bg-[#212121] dark:border-[#ffffff33] dark:text-white"
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}>
+            disabled={currentPage === 1}
+          >
             Previous
           </button>
-          <span className="text-gray-700 dark:text-gray-500">Page {currentPage} of {totalPages}</span>
-          <button className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50 dark:bg-[#212121] dark:border-[#ffffff33] dark:text-white"
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}>
+          <span className="text-gray-700 dark:text-gray-500">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50 dark:bg-[#212121] dark:border-[#ffffff33] dark:text-white"
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+          >
             Next
           </button>
         </div>
       )}
     </div>
+  );
+};
+
+const SearchResults = () => {
+  return (
+    <Suspense fallback={<div>Loading search results...</div>}>
+      <SearchResultsContent />
+    </Suspense>
   );
 };
 

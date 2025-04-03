@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { FaSearch, FaTrash } from "react-icons/fa";
 import axios from "axios";
@@ -18,31 +18,44 @@ type SearchHistoryItem = {
 const HistoryPage = () => {
   const user = useAppSelector((state) => state.user);
   const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
-
-  const fetchHistory = async () => {
-    try {
-      const response = await axios.get(`/api/history?user_id=${user.uid}`);
-      setSearchHistory(response.data.searchHistory || []);
-    } catch (error) {
-      console.error("Error fetching search history:", error);
-    }
-  };
+  const hasFetched = useRef(false);
 
   useEffect(() => {
-    if (!user?.uid) return;
+    if (!user?.uid || hasFetched.current) return;
+    hasFetched.current = true;
+
+    const fetchHistory = async () => {
+      try {
+        const response = await axios.get(`/api/history?user_id=${user.uid}`);
+        setSearchHistory(response.data.searchHistory || []);
+      } catch (error) {
+        console.error("Error fetching search history:", error);
+      }
+    };
+
     fetchHistory();
   }, [user?.uid]);
 
   const deleteHistoryItem = async (searchid: string) => {
-    await axios.delete(`/api/history?user_id=${user.uid}&searchid=${searchid}`);
-    setSearchHistory((prev) =>
-      prev.filter((item) => item.searchid !== searchid)
-    );
+    try {
+      await axios.delete(
+        `/api/history?user_id=${user.uid}&searchid=${searchid}`
+      );
+      setSearchHistory((prev) =>
+        prev.filter((item) => item.searchid !== searchid)
+      );
+    } catch (error) {
+      console.error("Error deleting history item:", error);
+    }
   };
 
   const clearAllHistory = async () => {
-    await axios.delete(`/api/history?user_id=${user.uid}&searchid=all`);
-    setSearchHistory([]);
+    try {
+      await axios.delete(`/api/history?user_id=${user.uid}&searchid=all`);
+      setSearchHistory([]);
+    } catch (error) {
+      console.error("Error clearing history:", error);
+    }
   };
 
   // Group history by date
@@ -65,13 +78,14 @@ const HistoryPage = () => {
           {searchHistory.length > 0 && (
             <button
               onClick={clearAllHistory}
+              aria-label="Clear all search history"
               className="text-red-600 text-sm flex items-center gap-1 px-4 py-2 cursor-pointer rounded-md border border-red-400 backdrop-blur-md shadow-md transition-all duration-300 hover:bg-red-500 hover:text-white hover:shadow-lg bg-transparent dark:text-red-500 dark:hover:text-white"
             >
               <FaTrash /> Clear All
             </button>
           )}
         </div>
-        <div className="overflow-y-scroll max-h-[100vh] pr-8">
+        <div className="overflow-y-auto sm:max-h-[60vh] max-h-[100vh] pr-8">
           {Object.keys(groupedHistory).length > 0 ? (
             <ul className="space-y-6">
               {Object.entries(groupedHistory).map(([date, items]) => (
@@ -99,9 +113,9 @@ const HistoryPage = () => {
                           {format(parseISO(item.time), "hh:mm a")}
                         </p>
                       </div>
-
                       <button
                         onClick={() => deleteHistoryItem(item.searchid)}
+                        aria-label={`Delete search history item: ${item.query}`}
                         className="text-gray-400 hover:text-red-500 transition-transform transform hover:scale-110"
                       >
                         <FaTrash />
