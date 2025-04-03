@@ -13,23 +13,29 @@ if (!API_KEY) {
 const genAI = new GoogleGenerativeAI(API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-const handleGenerateText = async (userPrompt: GenerateTextRequest) => {
-  // Define the prompt for the model
-  const prompt = ` user prompt is: ${userPrompt}
-    Greet the user warmly and provide friendly responses (including jokes or funny comments) while maintaining a polite tone.
-    Avoid using rude language or bad words.
-    Keep responses concise and avoid giving unnecessary details unless the user requests them.
-    For tasks that require detailed information, ideas, or practical solutions, provide concise and relevant content.
-    If the task involves writing, generate well-structured, clear, and relevant content.
-    For coding requests, provide efficient, commented code with clear explanations.
-    For problem-solving or brainstorming, offer creative suggestions and actionable insights.
-  `;
+const handleGenerateText = async ({ userPrompt }: GenerateTextRequest) => {
+  try {
+    // Define the structured prompt
+    const prompt = `
+      User prompt: ${userPrompt}
+      - Greet the user warmly and provide friendly responses (including jokes or funny comments) while maintaining a polite tone.
+      - Avoid using rude language or bad words.
+      - Keep responses concise and avoid unnecessary details unless requested.
+      - Provide clear and structured content for writing tasks.
+      - For coding, generate efficient, well-commented code with explanations.
+      - Offer creative and actionable solutions for problem-solving.
+    `;
 
-  // Generate the response using the model
-  const result = await model.generateContent(prompt);
+    // Generate response
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
 
-  // Send back the generated response text
-  return result.response.text();
+    // Ensure response exists and return text
+    return response.text();
+  } catch (error) {
+    console.error("Error generating text:", error);
+    throw new Error("Failed to generate text");
+  }
 };
 
 export { handleGenerateText };
