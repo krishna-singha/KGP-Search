@@ -1,19 +1,13 @@
-/** @type {import('next').NextConfig} */
-require("dotenv").config();
+import type { NextConfig } from "next";
 
-const nextConfig = {
-  env: {
-    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
-  },
+const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: "https",
         hostname: "**",
       },
     ],
   },
-  reactStrictMode: true,
 };
 
-module.exports = nextConfig;
+export default nextConfig;
