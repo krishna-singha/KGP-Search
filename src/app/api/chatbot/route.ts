@@ -8,9 +8,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const userPrompt = await request.json();
-
     const response = await handleGenerateText(userPrompt);
-
 
     // Return a successful response with JSON
     return new Response(JSON.stringify(response), {
