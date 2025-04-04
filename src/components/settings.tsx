@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FaMoon, FaSun, FaHistory } from "react-icons/fa";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
