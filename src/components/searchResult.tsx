@@ -122,6 +122,13 @@ const SearchResultsContent = () => {
     }
   };
 
+  const gotToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   return (
     <div className="w-full mx-auto space-y-3 md:space-y-6 md:px-6">
       <div className="w-full md:hidden">
@@ -190,7 +197,7 @@ const SearchResultsContent = () => {
               className="text-blue-700 text-lg font-medium hover:underline cursor-pointer dark:text-blue-400 leading-5 my-2"
               onClick={() => handleClickCount(result.url)}
             >
-              {result.title}
+              {result.title.slice(0, 100)}
             </div>
             <p className="text-gray-700 text-sm dark:text-gray-400">
               {result.content !== "[]" && result.content}
@@ -201,8 +208,11 @@ const SearchResultsContent = () => {
       {totalPages > 1 && (
         <div className="flex justify-center mt-6 gap-4 items-center">
           <button
-            className="px-4 py-2 bg-gray-200 rounded-md text-sm dark:bg-[#212121] dark:text-white"
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            className={`px-4 py-2 bg-gray-200 rounded-md text-sm dark:bg-[#212121] dark:text-white ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}
+            onClick={() => {
+              setCurrentPage((prev) => Math.max(prev - 1, 1))
+              gotToTop();
+            }}
             disabled={currentPage === 1}
           >
             Previous
@@ -211,10 +221,11 @@ const SearchResultsContent = () => {
             Page {currentPage} of {totalPages}
           </span>
           <button
-            className="px-4 py-2 bg-gray-200 rounded-md text-sm dark:bg-[#212121] dark:text-white"
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
+            className={`px-4 py-2 bg-gray-200 rounded-md text-sm dark:bg-[#212121] dark:text-white ${currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""}`}
+            onClick={() => {
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+              gotToTop();
+            }}
             disabled={currentPage === totalPages}
           >
             Next
