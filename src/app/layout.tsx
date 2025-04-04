@@ -35,11 +35,11 @@ export default function RootLayout({
         <StoreProvider>
           <ThemeProvider>
             <Navbar />
-            <main className="flex-1 min-h-screen max-w-7xl mx-auto w-full px-6 py-10">
+            <main className="flex-1 min-h-screen max-w-7xl mx-auto w-full px-4 py-6">
               {children}
               <ChatBotBtn />
             </main>
-            <Footer />
+            <Footer /> 
           </ThemeProvider>
         </StoreProvider>
       </body>

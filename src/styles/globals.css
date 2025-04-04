@@ -32,15 +32,12 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 } */
 
-.custom-bg {
-  background-image: url('../assets/bg.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
 
 .image {
   width: auto;
   height: auto;
+}
+
+.wChatBot {
+  max-width: calc(100% - 32px);
 }

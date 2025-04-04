@@ -8,11 +8,11 @@ import { useSearchParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { useAppSelector } from "@/lib/redux/hooks";
 import debounce from "lodash.debounce";
+import SearchBar from "./searchBar";
 
 const FASTAPI_URL = process.env.NEXT_PUBLIC_FASTAPI_URL;
 
 const RESULTS_PER_PAGE = 15;
-const FALLBACK_FAVICON = "https://www.iitkgp.ac.in/assets/img/favicon.png";
 
 export type SearchResult = {
   url: string;
@@ -74,9 +74,7 @@ const SearchResultsContent = () => {
   useEffect(() => {
     fetchResults(searchQuery);
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [searchQuery, fetchResults]);
 
@@ -104,7 +102,7 @@ const SearchResultsContent = () => {
       }
 
       if (historyMode) {
-        await axios.post("http://localhost:3000/api/history", {
+        await axios.post("/api/history", {
           user_id: userId,
           email: email,
           searchHistory: [
@@ -125,7 +123,10 @@ const SearchResultsContent = () => {
   };
 
   return (
-    <div className="w-full mx-auto space-y-6">
+    <div className="w-full mx-auto space-y-3 md:space-y-6 md:px-6">
+      <div className="w-full md:hidden">
+        <SearchBar />
+      </div>
       {loading && (
         <div
           className="fixed top-20 left-0 h-1 bg-blue-600 transition-all"
@@ -136,36 +137,42 @@ const SearchResultsContent = () => {
         About {results.length} results ({resTime} seconds)
       </p>
       {results.length === 0 && !loading && (
-        <div className="flex justify-center items-center heightF">
-          <span className="font-bold text-xl">No results found!!</span>
+        <div className="flex justify-center items-center min-h-[20vh]">
+          <span className="font-bold text-xl text-gray-700 dark:text-white">
+            No results found!
+          </span>
         </div>
       )}
       {paginatedResults.map((result, index) => (
         <div
           key={index}
-          className="border-b pb-4 flex gap-3 dark:border-[#ffffff33]"
+          className={`border-b pb-2 md:pb-4 flex flex-col md:flex-row dark:border-[#ffffff33] md:gap-3`}
         >
-          <div className="border-2 rounded-full overflow-hidden flex justify-center items-center h-[1.8rem] w-[1.8rem] dark:border-gray-400 bg-white">
-            <Link
-              href={result.url}
-              className="w-full h-full flex justify-center items-center"
-            >
-              <Image
-                src={result.favicon || FALLBACK_FAVICON}
-                alt="favicon"
-                width={16}
-                height={16}
-                className="w-full h-full object-cover rounded-full"
-                unoptimized
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = FALLBACK_FAVICON;
-                }}
-              />
-            </Link>
+          <div className="flex gap-3">
+            <div className="border-2 rounded-full overflow-hidden flex justify-center items-center h-[2rem] w-[2rem] dark:border-gray-400 bg-white">
+              <div className="w-[1.5rem]">
+                <Link
+                  href={result.url}
+                  className="w-full h-full flex justify-center items-center"
+                >
+                  <Image
+                    src={result.favicon || "/favicon.svg"}
+                    alt="favicon"
+                    width={16}
+                    height={16}
+                    unoptimized
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                </Link>
+              </div>
+            </div>
+            <div className="text-black font-semibold dark:text-white flex items-center md:hidden">
+              {splitUrl(result.url).domain}
+            </div>
           </div>
+
           <div className="flex flex-col justify-center w-full">
-            <div className="text-gray-500 text-sm flex items-center dark:text-white">
+            <div className="text-gray-500 text-xs items-center dark:text-white truncate hidden md:flex">
               <p className="inline-block text-black font-semibold dark:text-white">
                 {splitUrl(result.url).domain}
               </p>
@@ -173,14 +180,14 @@ const SearchResultsContent = () => {
                 .path.split("/")
                 .filter(Boolean)
                 .map((part, i) => (
-                  <span key={i} className="text-gray-500">
+                  <span key={i} className="text-gray-500 truncate">
                     <ChevronRight size={13} className="inline-block ml-1" />
                     {part}
                   </span>
                 ))}
             </div>
             <div
-              className="text-blue-700 text-lg font-medium hover:underline cursor-pointer dark:text-blue-500"
+              className="text-blue-700 text-lg font-medium hover:underline cursor-pointer dark:text-blue-400 leading-5 my-2"
               onClick={() => handleClickCount(result.url)}
             >
               {result.title}
@@ -192,19 +199,19 @@ const SearchResultsContent = () => {
         </div>
       ))}
       {totalPages > 1 && (
-        <div className="flex justify-center mt-4 gap-4 items-center">
+        <div className="flex justify-center mt-6 gap-4 items-center">
           <button
-            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50 dark:bg-[#212121] dark:border-[#ffffff33] dark:text-white"
+            className="px-4 py-2 bg-gray-200 rounded-md text-sm dark:bg-[#212121] dark:text-white"
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
           >
             Previous
           </button>
-          <span className="text-gray-700 dark:text-gray-500">
+          <span className="text-gray-700 dark:text-gray-500 text-sm">
             Page {currentPage} of {totalPages}
           </span>
           <button
-            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50 dark:bg-[#212121] dark:border-[#ffffff33] dark:text-white"
+            className="px-4 py-2 bg-gray-200 rounded-md text-sm dark:bg-[#212121] dark:text-white"
             onClick={() =>
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }
@@ -218,12 +225,10 @@ const SearchResultsContent = () => {
   );
 };
 
-const SearchResults = () => {
+export default function SearchResults() {
   return (
     <Suspense fallback={<div>Loading search results...</div>}>
       <SearchResultsContent />
     </Suspense>
   );
-};
-
-export default SearchResults;
+}

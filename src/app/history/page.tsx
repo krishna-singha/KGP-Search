@@ -58,7 +58,6 @@ const HistoryPage = () => {
     }
   };
 
-  // Group history by date
   const groupedHistory = searchHistory
     .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
     .reduce((acc, item) => {
@@ -69,64 +68,67 @@ const HistoryPage = () => {
     }, {} as Record<string, SearchHistoryItem[]>);
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-4">
-      <div className="w-full max-w-3xl bg-white/80 dark:bg-[#1e1e1e]/80 shadow-lg rounded-xl p-6 pt-0 mt-6 backdrop-blur-md border border-gray-200 dark:border-gray-700">
-        <div className="flex justify-between items-center py-4">
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-gray-200 mb-4">
+    <div className="min-h-screen flex flex-col items-center px-4 sm:px-6 lg:px-8 r">
+      <div className="w-full max-w-3xl bg-white/90 dark:bg-[#1e1e1e]/80 shadow-2xl rounded-xl p-4 sm:p-6 mt-6 backdrop-blur-md border border-gray-200 dark:border-gray-700">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 py-4">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
             🔍 Search History
           </h1>
           {searchHistory.length > 0 && (
             <button
+              aria-label={`delete-all-history`}
               onClick={clearAllHistory}
-              aria-label="Clear all search history"
-              className="text-red-600 text-sm flex items-center gap-1 px-4 py-2 cursor-pointer rounded-md border border-red-400 backdrop-blur-md shadow-md transition-all duration-300 hover:bg-red-500 hover:text-white hover:shadow-lg bg-transparent dark:text-red-500 dark:hover:text-white"
+              className="text-sm sm:text-base text-white flex items-center gap-2 px-4 py-2 rounded-md border border-red-500 bg-red-600 shadow-md hover:bg-red-700 transition-all"
             >
               <FaTrash /> Clear All
             </button>
           )}
         </div>
-        <div className="overflow-y-auto sm:max-h-[60vh] max-h-[100vh] pr-8">
+
+        <div className="overflow-y-auto max-h-[70vh] pr-2">
           {Object.keys(groupedHistory).length > 0 ? (
-            <ul className="space-y-6">
+            <ul className="space-y-4">
               {Object.entries(groupedHistory).map(([date, items]) => (
-                <div key={date} className="space-y-4">
-                  <h2 className="text-sm text-gray-500 dark:text-gray-400 font-semibold my-2">
+                <div key={date} className="space-y-3">
+                  <h2 className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-semibold my-2">
                     {date}
                   </h2>
                   {items.map((item) => (
                     <li
                       key={item.searchid}
-                      className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-[#262626] hover:shadow-md transition-all"
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg hover:bg-white hover:dark:bg-[#262626] shadow-sm hover:shadow-lg transition-all border border-gray-200 dark:border-[#ffffff33]"
                     >
-                      <div>
-                        <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                      <div className="w-full">
+                        <p className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white break-words">
                           {item.query}
                         </p>
                         <Link
                           href={item.url}
-                          className="text-blue-600 flex items-center gap-2 text-sm hover:underline dark:text-blue-400"
+                          className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 flex items-center gap-2 mt-1 hover:underline"
                         >
-                          <FaSearch className="text-gray-500 dark:text-gray-400 w-fit" />
-                          <div className="w-full">{item.url}</div>
+                          <FaSearch className="text-gray-500 dark:text-gray-400" />
+                          <span className="truncate w-full">{item.url}</span>
                         </Link>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                        <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 mt-1">
                           {format(parseISO(item.time), "hh:mm a")}
                         </p>
                       </div>
-                      <button
-                        onClick={() => deleteHistoryItem(item.searchid)}
-                        aria-label={`Delete search history item: ${item.query}`}
-                        className="text-gray-400 hover:text-red-500 transition-transform transform hover:scale-110"
-                      >
-                        <FaTrash />
-                      </button>
+                      <div className=" flex justify-end ">
+                        <button
+                          aria-label={`delete-history-${item.searchid}`}
+                          onClick={() => deleteHistoryItem(item.searchid)}
+                          className="text-gray-400 hover:text-red-500 transition-transform transform hover:scale-110"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
                     </li>
                   ))}
                 </div>
               ))}
             </ul>
           ) : (
-            <p className="text-gray-500 text-center text-lg">
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 text-center mt-8">
               No search history found.
             </p>
           )}
